@@ -21,12 +21,16 @@ spec:
         image: mysql:8.0.22
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: password
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: rootpassword
         livenessProbe:
           tcpSocket:
             port: 3306
         ports:
           - containerPort: 3306
+        #volume mount for the init sql script
         volumeMounts:
           - name: init-config
             mountPath: "/docker-entrypoint-initdb.d"
