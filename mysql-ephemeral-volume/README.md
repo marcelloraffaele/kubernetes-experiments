@@ -70,4 +70,8 @@ quit
 To clean everything we can use the label that we defined.
 ```bash
 kubectl delete replicaset,configmap,secret -l "project=mysql-test"
+#result
+replicaset.apps "mysql" deleted
+configmap "mysql-configmap" deleted
+secret "mysql-secret" deleted
 ```
