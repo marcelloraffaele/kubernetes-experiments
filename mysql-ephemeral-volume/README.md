@@ -1,8 +1,10 @@
 # kubernetes-experiments: MySQL Ephemeral volume
 
+This example shows how to create a MySQL Database in Kubernetes with ephemeral storage.
+This means that every time the pod is deleted the data will be lost and recreated from the initial setup defined insid the config map.
+
+
 From the documentation:
-
-
 On-disk files in a container are ephemeral, which presents some problems for non-trivial applications when running in containers. 
 from ([https://kubernetes.io/docs/concepts/storage/volumes/](https://kubernetes.io/docs/concepts/storage/volumes/))
 

@@ -19,24 +19,32 @@ spec:
       containers:
       - name: database
         image: mysql:8.0.22
-#        command: [ "--default-authentication-plugin=mysql_native_password" ]
-#        resources:
-#          requests:
-#            cpu: 1
-#            memory: 2Gi
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: password
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: rootpassword
         livenessProbe:
           tcpSocket:
             port: 3306
         ports:
           - containerPort: 3306
         volumeMounts:
-          - name: database
-            # /var/lib/mysql is where MySQL stores its databases
-            mountPath: "/var/lib/mysql"
+        #volume mount for the init sql script
+          - name: init-config
+            mountPath: "/docker-entrypoint-initdb.d"
+            readOnly: true
+        #volume mount for data
+          - name: mysql-persistent-storage
+            mountPath: /var/lib/mysql
       volumes:
-      - name: database
-        persistentVolumeClaim:
-          claimName: database
+        - name: init-config
+          configMap:
+            name: mysql-configmap
+            items:
+              - key: "init.sql"
+                path: "init.sql"
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
