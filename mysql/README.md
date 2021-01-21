@@ -31,6 +31,9 @@ kubectl apply -f mysql-replicaset.yaml
 
 #check
 kubectl get configmap,secret,rs,pod,pvc,pv -l "project=mysql-test"
+```
+And the response will be something similar to this:
+```bash
 #this are the created objects
 NAME                        DATA   AGE
 configmap/mysql-configmap   1      7s
@@ -62,7 +65,9 @@ mysql -h localhost -u root -p
 #otherwise open mysql using root account
 mysql -h localhost -u eventdb -p
 # write the 'eventdb' password
-
+```
+Now that we have the mysql client running, we can check the database:
+```bash
 use eventdb;
 SHOW TABLES;
 select * from event;
@@ -78,7 +83,9 @@ quit
 To clean everything we can use the label that we defined.
 ```bash
 kubectl delete replicaset,configmap,secret,pvc -l "project=mysql-test"
-#result
+```
+As result we will see:
+```bash
 replicaset.apps "mysql" deleted
 configmap "mysql-configmap" deleted
 secret "mysql-secret" deleted
