@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app2
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app2-cm
+  namespace: app2
+data:
+  index.html: |-
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>app2</title>
+    </head>
+    <body>
+      <h1>App2</h1>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2-deploy
+  namespace: app2
+  labels:
+    app: app2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: app2
+        image: httpd:2.4
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - name: app2-config
+            mountPath: "/usr/local/apache2/htdocs/"
+            readOnly: true
+      volumes:
+        - name: app2-config
+          configMap:
+            name: app2-cm
+            items:
+              - key: "index.html"
+                path: "index.html"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2
+  namespace: app2
+  labels:
+    app: app2
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: app2
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: app2
+  namespace: app2
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: demo.localdev.me
+    http:
+      paths:
+      - path: /app2(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: app2
+            port: 
+              number: 80
