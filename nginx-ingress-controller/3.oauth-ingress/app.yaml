@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app1-cm
+  namespace: app1
+data:
+  index.html: |-
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Simple application</title>
+    </head>
+    <body>
+      <h1>This is a simple application</h1>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1-deploy
+  namespace: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: httpd:2.4
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - name: app1-config
+            mountPath: "/usr/local/apache2/htdocs/"
+            readOnly: true
+      volumes:
+        - name: app1-config
+          configMap:
+            name: app1-cm
+            items:
+              - key: "index.html"
+                path: "index.html"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1
+  namespace: app1
+  labels:
+    app: app1
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: app1
+  type: ClusterIP

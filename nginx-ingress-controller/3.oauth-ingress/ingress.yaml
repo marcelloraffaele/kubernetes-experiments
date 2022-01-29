@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app1
+  namespace: app1
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - secure.localdev.me
+    secretName: my-tls-cert
+  rules:
+  - host: secure.localdev.me
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: app1
+            port: 
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oauth2-proxy
+  namespace: oauth2-proxy
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - secure.localdev.me
+    secretName: my-tls-cert
+  rules:
+  - host: secure.localdev.me
+    http:
+      paths:
+      - path: /oauth2
+        pathType: Prefix
+        backend:
+          service:
+            name: oauth2-proxy
+            port:
+              number: 4180
