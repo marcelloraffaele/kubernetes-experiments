@@ -39,4 +39,5 @@ curl -k https://secure.localdev.me
 # Clean up
 ```
 kubectl delete namespace app1
+kubectl delete namespace oauth2-proxy
 ```
