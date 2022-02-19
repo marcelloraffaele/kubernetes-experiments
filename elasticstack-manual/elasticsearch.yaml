@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: elasticstack
+  labels:
+    app: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        env:
+        - name: discovery.type
+          value: single-node
+        image: elasticsearch:8.0.0
+        imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: elasticstack
+  labels:
+    app: elasticsearch
+spec:
+  ports:
+  - name: port1
+    port: 9200
+    targetPort: 9200
+  - name: port2
+    port: 9300
+    targetPort: 9300
+  selector:
+    app: elasticsearch
+  type: ClusterIP

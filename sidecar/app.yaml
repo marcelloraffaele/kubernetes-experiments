@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  namespace: app1
+  labels:
+    app: app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      #main container
+      - name: app1
+        image: nginx:1.21.6-alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-log
+          mountPath: /var/log/nginx
+      #sidecar
+      - name: sidecar-container
+        image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "tail -f /var/log/nginx/access.log"]
+        volumeMounts:
+        - name: nginx-log
+          mountPath: /var/log/nginx
+      #shared volume
+      volumes:
+      - name: nginx-log
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1
+  namespace: app1
+  labels:
+    app: app1
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: app1
+  type: ClusterIP
